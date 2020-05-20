@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 public abstract class Player {
 	
+	Game game;
 	int playerNumber;
 	int direction; 
 	List<Piece> myList = new ArrayList<Piece>();
@@ -21,9 +22,11 @@ public abstract class Player {
 		return piece;
 	}
 	
-	//public void executeMove(Move move) {}
+	public void executeMove(Move move) {}
 	public void getGame() {}
-	public void setGame(Game game) {}
+	public void setGame(Game game) {
+		this.game = game;
+	}
 	public Piece[] getPieces() { 
 		return (Piece[]) myList.toArray();
 	}
@@ -39,7 +42,7 @@ public abstract class Player {
 	public void setDirection(int direction) {
 		this.direction = direction;
 	}
-	//public abstract void chooseMove(Move move);
+	public abstract Move chooseMove(Move move);
 	public void king(Piece piece) {
 		piece.king();
 	}

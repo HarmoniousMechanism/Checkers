@@ -1,10 +1,13 @@
 package Checkers;
+
+import java.util.ArrayList;
+import java.util.List;
+
 public class Game {
 	Tile[][] tile;
-	Player player1, player2;
-	/*
-	 * Initializes the game and creates the board, an 8 by 8 array of Tiles.Does not yet add Pieces to the Board.
-	 */
+	Player player1, player2, turn;
+	List<Move> moves = new ArrayList<Move>();
+	
 	public Game() {
 		this.player1 = this.player2 = null;
 		
@@ -14,12 +17,7 @@ public class Game {
 			}
 		}
 	}
-	/*
-	 * If the game has no players, sets the supplied Player to be Player One. 
-	 * If the game currently has one player, sets the supplied Player to be 
-	 * Player Two, assigns colors and directions to each Player as appropriate, 
-	 * and starts the game. If the game currently has two non-null players, does nothing.
-	 */
+
 	public void AddPlayer(Player newPlayer) {
 		if(this.player1 == null) {
 			this.player1 = newPlayer;
@@ -42,10 +40,115 @@ public class Game {
 	public Tile getTile(int row, int col) { 
 		return tile[col][row];
 	}
-	//protected void exectuteMove(Move move) {}
-	// protected void isLegalMove(Move move) {}
-	protected void play() {}
-	protected void startGame() {}
-	protected void switchTurns() {}
+	protected void exectuteMove(Move move) {
+		Piece capturedPiece;
+		
+		this.player1.executeMove(move);
+		this.player2.executeMove(move);
+		
+		// Update the board
+		move.dest.setOccupant(move.start.getOccupant());
+		move.dest.setOccupant(null);
+		
+		if(move.capture) {
+			//Captured, removed and updates players list
+			capturedPiece = tile[(move.dest.col + move.start.col)/2][(move.dest.row + move.start.row)/2].getOccupant();
+			capturedPiece.getPlayer().removePiece(capturedPiece);
+		}
+		// If kinged
+		if(((move.dest.row == 7) & (move.dest.getOccupant().direction == 1))
+			|((move.dest.row == 0) & (move.dest.getOccupant().direction == -1))){
+			move.dest.getOccupant().king();
+		}
+		// Update the list of moves 
+		this.moves.add(move);		
+	}
+	/*
+	 * Is a legal move if: 
+	 * a) The initial tile has a piece to move
+	 * b) the piece being moved is the player whose turn it is
+	 * c) the destination tile is not out of bounds
+	 * d) There is not a current piece on the tile
+	 * e) If wanting to jump, there must be a piece in between
+	 */
+	protected boolean isLegalMove(Move move) {
+		//a)
+		if(!move.start.isOccupied()) {
+			return false;
+		}
+		//b)
+		if(move.start.getOccupant().getPlayer() != turn) {
+			return false;
+		}
+		//c)
+		if((0 > move.dest.col | move.dest.col >= 8)
+		  |(0 > move.dest.row | move.dest.row >= 8)){
+			return false;
+		}
+		//d)
+		if(move.dest.isOccupied()) {
+			return false;
+		}
+		//e)
+		if((move.capture) & (!tile[(move.dest.col + move.start.col)/2][(move.dest.row + move.start.row)/2].isOccupied())) {
+			return false;
+		}
+		
+		return true;
+	}
+	
+	protected void play() {
+		while(!this.endGame()) {
+			Move selectedMove;
+			
+			//Temp values must change to Tile select 
+			do{
+				selectedMove = turn.chooseMove(new Move(tile[1][2], tile[3][4]));
+			}while (!this.isLegalMove(selectedMove));
+			
+			this.exectuteMove(selectedMove);
+			this.switchTurns();
+		}
+	}
+	protected void startGame() {
+		//Set all spaces to empty
+		for(int i = 0; i < 8; i++){
+			for(int j = 0; j < 8; j++) {
+				tile[i][j].setOccupant(null);
+			}
+		}
+		boolean blackTile = false;
+		//Set red side (upper)
+		for(int i = 0; i < 4; i++) {
+			for(int j = 0; j < 8; j++) {
+				if(blackTile) {
+					player1.addPiece(tile[i][j]);
+					tile[i][j].setOccupant(player1.getPieces()[player1.getNumPieces()]);
+				}
+			}
+		}
+		
+		blackTile = true;
+		//Set black side (upper)
+		for(int i = 0; i < 4; i++) {
+			for(int j = 0; j < 8; j++) {
+				if(blackTile) {
+					player2.addPiece(tile[i][j]);
+					tile[i][j].setOccupant(player2.getPieces()[player2.getNumPieces()]);
+				}
+			}
+		}
+		
+		// start the game
+		this.play();		
+	}
+	
+	protected void switchTurns() {
+		if(this.turn == player1) {
+			this.turn = player2;
+		} else {
+			this.turn = player1;
+		}
+	}
 	
 }

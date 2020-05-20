@@ -4,7 +4,7 @@ package Checkers;
 public class Piece {
 	private Player player;
 	private Tile tile;
-	private int direction;
+	public int direction;
 	private boolean kinged;
 	
 	public Piece(Player player, Tile tile, int direction) {
@@ -27,30 +27,17 @@ public class Piece {
 		}
 		// Check for non king
 		// Standard, move on space diagonally
-		if( tile.row == (this.tile.row + 1 | this.tile.row - 1) 
-			& (this.direction <= tile.col - this.tile.col)) {
+		if( tile.col == (this.tile.col + 1 | this.tile.col - 1) 
+			& (this.direction <= tile.row - this.tile.row)) {
 			
 			return true;
 		}
 		// Standard, capture and move two spaces diagonally
 		// Currently does not account whether there is a piece between 
-		else if( tile.row == (this.tile.row + 2 | this.tile.row - 2)
-				& (this.direction <= tile.col - this.tile.col)) {
+		else if( tile.col == (this.tile.col + 2 | this.tile.col - 2)
+				& (this.direction <= tile.row - this.tile.row)) {
 			
 			return true;	
-		}
-		//check for king
-		if(isKinged()) {
-			if( tile.row == (this.tile.row + 1 | this.tile.row - 1)){
-				
-				return true;
-			}
-			// Standard, capture and move two spaces diagonally
-			// Currently does not account whether there is a piece between 
-			else if( tile.row == (this.tile.row + 2 | this.tile.row - 2)) {
-				
-				return true;	
-			}
 		}
 		 return false;
 	}

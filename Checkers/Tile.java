@@ -25,7 +25,6 @@ public class Tile {
 		this.occupant = newOccupant;
 		this.occupied = true;
 	}
-
 	public boolean isOccupied() { 
 		return occupied;	
 	}
